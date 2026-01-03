@@ -3,7 +3,6 @@
 ### <center> Anomaly Detection in Financial Market Data
 ####  <center>  using Isolation Forest and Features
 ___
-&nbsp;
 
 **Authors:** &nbsp;Erik Autenrieth, Pierre Zimmermann &nbsp;
 
@@ -26,7 +25,7 @@ These jumps can be simulated in a Merton jump-diffusion process, which can model
 The Isolation Forest was tested with various features on this generated batch data to be able to apply the model to real financial data.
 
 Here, above all, concepts and results from the master thesis 
-[”Detecting anomalies in data streams driven by a jump-diffusion process”](https://umu.diva-portal.org/smash/record.jsf?pid=diva2%3A1563784&dswid=-3478) by Carl Paulin, were used to reproduce the results and to be able to use the resulting models for the analysis of real data.
+[Detecting anomalies in data streams driven by a jump-diffusion process](https://umu.diva-portal.org/smash/record.jsf?pid=diva2%3A1563784&dswid=-3478) by Carl Paulin, were used to reproduce the results and to be able to use the resulting models for the analysis of real data.
 
 While the master thesis uses several algorithms such as Robust Random Cut Forest and Isolation Forest for streaming data, this work is limited to reproducing the results of the Isolation Forest on the same features such as the returns, realized variation, realized bipower variation, and realized semi-variation. The methods were also tested on six different jump rates which served as contamination for the Isolation Forest.
 

@@ -1,10 +1,15 @@
-import Testdata.Builder as Builder
+from pathlib import Path
+
+from anomaly_detection.synthetic import analysis as Builder
 
 import time
 import numpy as np
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+
+FIGURE_DIR = Path(__file__).resolve().parents[3] / 'outputs' / 'figures' / 'synthetic'
+
 
 def sim_table(n:int=10):
     """ Creates a simulation for six given jump rates.
@@ -58,5 +63,5 @@ def sim_table(n:int=10):
 def table_heatmap(df=None):
     fig = plt.figure(facecolor='w', edgecolor='k')
     sns.heatmap(df, annot=True, cmap='viridis', cbar=False)
-    plt.savefig('../../Pictures/Testdata/F1_scores_Project.png')
+    plt.savefig(FIGURE_DIR / 'f1_scores_project.png')
     plt.show()

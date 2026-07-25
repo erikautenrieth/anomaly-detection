@@ -2,7 +2,10 @@ import warnings
 import numpy as np
 import pandas as pd
 from sklearn.ensemble import IsolationForest
-from pandas.core.common import SettingWithCopyWarning
+try:
+    from pandas.errors import SettingWithCopyWarning
+except ImportError:
+    SettingWithCopyWarning = pd.errors.ChainedAssignmentError
 from sklearn.metrics import accuracy_score
 
 warnings.simplefilter(action='ignore', category=SettingWithCopyWarning)

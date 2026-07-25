@@ -1,6 +1,10 @@
+from pathlib import Path
+
 import seaborn as sns
 import matplotlib.pyplot as plt
 import pandas as pd
+
+FIGURE_DIR = Path(__file__).resolve().parents[3] / 'outputs' / 'figures' / 'market'
 
 sns.set_style('darkgrid')
 
@@ -19,7 +23,7 @@ def plot_signed_anomaly(df:pd.DataFrame=None, label:str=None):
     plt.figure(figsize=(10, 8))
     sns.lineplot(data=df['Close'], legend='auto', label=label)
     sns.scatterplot(data=data['Anomalie'], label='Signed anomaly', color='red', alpha=.6, s=110)
-    plt.savefig('../../Pictures/Stockdata/AdjustetAnomalies_Stockdata.png')
+    plt.savefig(FIGURE_DIR / 'adjusted_anomalies.png')
 
 
 def plotter(df: pd.DataFrame = None, label: str = None, features=False):
@@ -52,7 +56,7 @@ def plotter(df: pd.DataFrame = None, label: str = None, features=False):
     rsv_rsv = rsv['SJ']
     rsv = rsv['Close']
     sns.scatterplot(data=rsv, label='IF RSV', color='orange', alpha=1, marker="v", s=70)
-    plt.savefig('../../Pictures/Stockdata/ChartAnomalies_Stockdata.png')
+    plt.savefig(FIGURE_DIR / 'chart_anomalies.png')
 
     if features:
         # Return log
@@ -60,7 +64,7 @@ def plotter(df: pd.DataFrame = None, label: str = None, features=False):
 
         sns.lineplot(data=df['Return log'], legend='auto', label='Returns (log)')
         sns.scatterplot(data=ret_return, legend='auto', label='IF Return', color='red', s=110)
-        plt.savefig('../../Pictures/Stockdata/Return_Stockdata.png')
+        plt.savefig(FIGURE_DIR / 'returns.png')
         rsv_diff = df.loc[(df['Amomaly RSV Diff'] == 1)]
         rsv_diff = rsv_diff['SJ']
 
@@ -81,6 +85,6 @@ def plotter(df: pd.DataFrame = None, label: str = None, features=False):
 
         sns.lineplot(ax=axes[3], data=df['SJ'], legend='auto', label='RSV and Diff')
         sns.scatterplot(ax=axes[3], data=rsv_diff, color='red', legend='auto', label='Anomaly')
-        plt.savefig('../../Pictures/Stockdata/Features_Stockdata.png')
+        plt.savefig(FIGURE_DIR / 'features.png')
 
     plt.show()

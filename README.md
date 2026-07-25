@@ -1,75 +1,163 @@
-# Data Analysis Project (H-BRS)
+# Anomaly Detection in Financial Market Data
 
-### <center> Anomaly Detection in Financial Market Data
-####  <center>  using Isolation Forest and Features
-___
+Isolation Forest experiments on synthetic Merton jump-diffusion paths and historical financial market data.
 
-**Authors:** &nbsp;Erik Autenrieth, Pierre Zimmermann &nbsp;
+![Detected jumps and Isolation Forest anomalies](outputs/figures/synthetic/detected_jumps.png)
 
-**Date:** &nbsp;&nbsp;&nbsp;&nbsp;  20.12.2021
+## Overview
 
+This research project investigates whether an [Isolation Forest](https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.IsolationForest.html) can detect abrupt changes in financial time series. It first evaluates the method on synthetic data, where the true jumps are known, and then applies the same feature pipeline to market data downloaded with [yfinance](https://ranaroussi.github.io/yfinance/).
 
-## Table of contents
-* [General info](#general-info)
-* [Aim of the project](#aim-of-the-project)
-* [Technologies](#technologies)
-* [Setup](#setup)
-* [Result](#result)
+The work is based on concepts from Carl Paulin's 2021 master's thesis, [*Detecting anomalies in data streams driven by a jump-diffusion process*](http://urn.kb.se/resolve?urn=urn:nubn:se:umu:diva-184230).
 
-## General info
+## Method
 
-Anomalies can occur in financial time series and cause a sudden price jump.
-The anomaly detection in financial market data is important for modeling and improving analytical and predictive models as well as detecting market manipulation.
+The synthetic workflow generates a Merton jump-diffusion process and extracts:
 
-These jumps can be simulated in a Merton jump-diffusion process, which can model a financial time series.  The test data marked in this way can then be examined for outliers using machine learning algorithms.
-The Isolation Forest was tested with various features on this generated batch data to be able to apply the model to real financial data.
+- logarithmic returns
+- realized variance (RV)
+- realized bipower variation (BPV)
+- the difference `RV - BPV`
+- realized semi-variation (RSV), represented by signed jumps
 
-Here, above all, concepts and results from the master thesis 
-[Detecting anomalies in data streams driven by a jump-diffusion process](https://umu.diva-portal.org/smash/record.jsf?pid=diva2%3A1563784&dswid=-3478) by Carl Paulin, were used to reproduce the results and to be able to use the resulting models for the analysis of real data.
+Isolation Forest models run on individual and combined features. A threshold-based cutoff method provides a baseline. Because synthetic jumps are known, the notebooks compare detections with F1 scores, classification reports, and confusion matrices.
 
-While the master thesis uses several algorithms such as Robust Random Cut Forest and Isolation Forest for streaming data, this work is limited to reproducing the results of the Isolation Forest on the same features such as the returns, realized variation, realized bipower variation, and realized semi-variation. The methods were also tested on six different jump rates which served as contamination for the Isolation Forest.
+![Extracted volatility features](outputs/figures/synthetic/features.png)
 
-The results of the examined thesis can be partially confirmed. This states that the results of the Isolation Forest get better when features are used, whereas when three features are used, the results get worse. The results of this work show that all features deliver relatively similar result. However, it shows that feature extraction is worthwhile, especially since anomalies are rarely detected without using a feature.
-While the CutOff in the master thesis was always worse than the Isolation Forest, this was better in the analysis of this work.
-However, this has no effect on the analysis of the real data, as it does not contain any signed jumps, which are necessary for calculating a CutOff.
+The market workflow downloads historical close prices, computes the same features, and visualizes the detected anomalies.
 
+![Detected anomalies in market data](outputs/figures/market/chart_anomalies.png)
 
-## Aim of the project
-The aim of his work is to verify the usability of the Isolation Forest for anomaly detection in finance market data. The analysis of test data and the comparison of the results provide a verified model that is suitable for use on real data. 
-In the financial market analysis, significant increases or decreases in the price fluctuations of both, the stock chart and the features charts, should be recognized.
+## Repository Structure
 
+```text
+.
+├── src/anomaly_detection/
+│   ├── synthetic/          # Merton simulation, feature analysis, evaluation
+│   └── market/             # Market loader, feature analysis, plotting
+├── notebooks/
+│   ├── synthetic/          # Reproducible synthetic-data experiments
+│   └── market/             # Network-dependent market-data experiments
+├── outputs/figures/
+│   ├── synthetic/          # Generated and reference figures
+│   └── market/
+├── pyproject.toml
+├── LICENSE
+└── README.md
+```
 
+## Requirements
 
-## Technologies
-Project created with:
-* Python 3.9
-* Jupyter Notebooks
+- Python 3.9 or newer
+- internet access for the market-data notebooks
 
-## Setup
-The test data will be generated with the help of a Merton jump diffusion model. This process consists of a Brownian motion and Poisson distributed jumps. 
-Then the features return, realized variance, realized bipower variation, difference, signed jumps will be extracted. 
+Python dependencies are declared in [`pyproject.toml`](pyproject.toml).
 
-### Extracted Features
+## Installation
 
-![alt text](https://github.com/Mastercheef/Projekt-Datenanalyse/blob/main/Pictures/Testdata/Features_Testdata.png)
+```bash
+git clone https://github.com/Mastercheef/anomaly-detection.git
+cd anomaly-detection
 
+python -m venv .venv
+source .venv/bin/activate       # Windows: .venv\Scripts\activate
+python -m pip install --upgrade pip
+python -m pip install -e ".[notebooks]"
+```
 
-The Isolation Forest and CutOff method will then search for jumps in these features. 
+Run the project from this checkout with the editable installation shown above. It makes `anomaly_detection` importable regardless of the notebook directory and keeps generated figures inside this repository.
 
-### Isolation Forest and CutOff Detecting on Data
+## Quick Start
 
-![alt text](https://github.com/Mastercheef/Projekt-Datenanalyse/blob/main/Pictures/Testdata/MarkedJumps_Testdata.png)
+Start Jupyter from the repository root:
 
-To test the performance of these two algorithms, the F1-Score of each will be compared.
-In the next step, the Isolation Forest and cutoff method will be applied to real financial data obtained through the Yahoo Finance API.
+```bash
+jupyter notebook
+```
 
-## Result
-The artificial test data from the master’s thesis could be reproduced. However, since a Merton-jump process depends on several parameters, the time series could not be reproduced with exactly the same fluctuations. 
+### Synthetic data
 
-As a result, the CutOff in the own experiment was always better, than the Isolation Forest, which was exactly the opposite in the master’s thesis. No CutOff can be calculated for real data, so this difference has no influence on further analyzes.
-It could be confirmed that the Isolation Forrest works best with the Return feature but can be partially improved with the Diff or RSV feature. 
+```python
+from anomaly_detection.synthetic.analysis import simulation_test, plotter
 
-In both cases, a combination of three features works the worst.
-While the F1-scores of the master’s thesis fluctuated with different jump rates, the F1-scores of the own work rose continuously with the increasing jump rate.
-When analyzing real data, it could be shown that distinctive points were found in the feature charts. This shows that the Isolation Forest works in a similar way to the master thesis and that the experiment worked. 
+data = simulation_test(
+    v=0.035,
+    l=9,
+    step=1000,
+    sigma=0.25,
+    N=1,
+    print_f1=True,
+)
+plotter(data)
+```
 
+Generated plots are written to [`outputs/figures/synthetic`](outputs/figures/synthetic).
+
+### Market data
+
+```python
+import pandas as pd
+
+from anomaly_detection.market.analysis import build_stock
+from anomaly_detection.market.loader import Stocks
+from anomaly_detection.market.plotting import plot_signed_anomaly, plotter
+
+tickers = ["META", "AMZN", "AAPL", "NFLX", "GOOG"]
+stocks = Stocks(tickers, tickers, start="2014-01-01", stop="2021-10-01")
+
+label = "AAPL"
+prices = pd.DataFrame(stocks.df_stocks[label]["Close"])
+result = build_stock(prices, N=1, contamin=0.008)
+
+plotter(result, label, features=True)
+plot_signed_anomaly(result, label)
+```
+
+Generated plots are written to [`outputs/figures/market`](outputs/figures/market). Market downloads depend on the current availability and response format of Yahoo Finance.
+
+## Notebooks
+
+| Notebook | Purpose | External data |
+| --- | --- | --- |
+| [`synthetic/plot_path.ipynb`](notebooks/synthetic/plot_path.ipynb) | Generate a Merton path and visualize jumps, features, Isolation Forest, and cutoff detections | No |
+| [`synthetic/confusion_matrix.ipynb`](notebooks/synthetic/confusion_matrix.ipynb) | Compare Isolation Forest and cutoff classifications | No |
+| [`synthetic/simulation.ipynb`](notebooks/synthetic/simulation.ipynb) | Compare repeated runs across six jump rates with the thesis results | No |
+| [`market/plot_faang_stocks.ipynb`](notebooks/market/plot_faang_stocks.ipynb) | Detect anomalies in FAANG stocks | Yahoo Finance |
+| [`market/plot_futures.ipynb`](notebooks/market/plot_futures.ipynb) | Apply the analysis to futures | Yahoo Finance |
+| [`market/stock_prediction.ipynb`](notebooks/market/stock_prediction.ipynb) | Explore historical post-anomaly price direction | Yahoo Finance |
+| [`market/stock_simulation.ipynb`](notebooks/market/stock_simulation.ipynb) | Compare contamination settings across market indices | Yahoo Finance |
+
+## Results
+
+The experiments support the usefulness of feature extraction: sharp changes are easier to identify in returns and volatility-derived features than in the raw synthetic path alone. Performance varies by random run, feature, jump rate, and contamination setting. The saved notebooks are historical experiment records, not deterministic benchmarks.
+
+The market notebooks provide qualitative anomaly visualizations. Unlike the synthetic data, market data has no ground-truth jump labels, so those results do not establish predictive performance.
+
+## Reproducibility and Limitations
+
+- Simulations and Isolation Forest models do not currently set fixed random seeds, so results vary between runs.
+- Market notebooks require live Yahoo Finance access; historical responses and ticker availability can change.
+- Futures can contain non-positive values, for which logarithmic returns are undefined.
+- The saved notebook outputs originate from older environments and may display historical warnings.
+- The exploratory post-anomaly buying notebooks are not a validated trading strategy.
+
+## Data Sources and References
+
+- Carl Paulin, *Detecting anomalies in data streams driven by a jump-diffusion process*, Umeå University, 2021: [URN record](http://urn.kb.se/resolve?urn=urn:nubn:se:umu:diva-184230)
+- scikit-learn: [IsolationForest API](https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.IsolationForest.html)
+- yfinance: [documentation](https://ranaroussi.github.io/yfinance/)
+- Yahoo: [API terms of use](https://legal.yahoo.com/us/en/yahoo/terms/product-atos/apiforydn/index.html)
+
+`yfinance` is an independent open-source library and is not affiliated with Yahoo. Use downloaded data in accordance with Yahoo's terms.
+
+## Authors
+
+Erik Autenrieth and Pierre Zimmermann — H-BRS data analysis project, December 2021.
+
+## License
+
+Licensed under the [MIT License](LICENSE).
+
+## Disclaimer
+
+This repository is an educational research project. It does not provide financial or investment advice.

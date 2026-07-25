@@ -1,8 +1,8 @@
 import pandas as pd
 import numpy as np
 import time
-from Stocks.StocksLoader import *
-from Stocks.BuilderStock import acc_score, build_stock
+from anomaly_detection.market.analysis import acc_score, build_stock
+from anomaly_detection.market.loader import Stocks
 
 def stock_simulation(labels:[str]=None, predict:int=90)->pd.DataFrame:
     """

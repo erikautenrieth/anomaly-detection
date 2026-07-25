@@ -1,4 +1,6 @@
-from Testdata.MertonJump import merton_jump_paths
+from pathlib import Path
+
+from anomaly_detection.synthetic.merton import merton_jump_paths
 
 import warnings
 import matplotlib.pyplot as plt
@@ -10,7 +12,12 @@ from sklearn.ensemble import IsolationForest
 from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import f1_score
-from pandas.core.common import SettingWithCopyWarning
+try:
+    from pandas.errors import SettingWithCopyWarning
+except ImportError:
+    SettingWithCopyWarning = pd.errors.ChainedAssignmentError
+
+FIGURE_DIR = Path(__file__).resolve().parents[3] / 'outputs' / 'figures' / 'synthetic'
 
 warnings.simplefilter(action='ignore', category=SettingWithCopyWarning)
 sns.set()
@@ -38,7 +45,7 @@ def buildMertonDF(jump_rate:float=None, l:int=None, step:int=None, v=0.0395, lam
     # add jumps
     jumps_x = list(np.ndarray.nonzero(jumps))[0]
     jumpsDf = pd.DataFrame(mertonDf.iloc[jumps_x])
-    mertonDf['Jumps plot'] = 0
+    mertonDf['Jumps plot'] = 0.0
     mertonDf.loc[jumps_x, 'Jumps plot'] = jumpsDf['Merton Jump']
     jumps = [1 if i > 0 else 0 for i in mertonDf['Jumps plot'].tolist()]
     mertonDf['Jumps'] = jumps
@@ -272,7 +279,7 @@ def plot_cut(data=None, label: str = None):
 
     sns.lineplot(data=cut_df['Cut'], color='red', label='CutOff')
     sns.lineplot(data=cut_min_df['Cut'], color='red')
-    plt.savefig('../../Pictures/Testdata/CutOff_Testdata.png')
+    plt.savefig(FIGURE_DIR / 'cutoff.png')
     plt.show()
 
 
@@ -305,7 +312,7 @@ def plot_confusion_matrix(cm=None):
     ax.set_title('Confusion Matrix normalize')
     ax.xaxis.set_ticklabels(['normal', 'anomaly']);
     ax.yaxis.set_ticklabels(['normal', 'anomaly'])
-    plt.savefig('../../Pictures/Testdata/ConfusionMatrix_Testdata.png')
+    plt.savefig(FIGURE_DIR / 'confusion_matrix.png')
     plt.show()
 
 
@@ -339,14 +346,14 @@ def plotter(df=None):
     cut = df.loc[(df['CutOff RSV']) == 1]
     cut = cut['Merton Jump']
     #sns.scatterplot(data=cut, label='CutOff RSV', color='orange', alpha=0.9, marker="x", s=100)
-    plt.savefig('../../Pictures/Testdata/MarkedJumps_Testdata.png')
+    plt.savefig(FIGURE_DIR / 'detected_jumps.png')
 
     # Returns log
     plt.figure(figsize=(12, 8))
     r = sns.lineplot(data=df['Return log'], legend='auto', label='Returns (log)')
     r.set_xlabel("Step")
     r.set_ylabel("Return")
-    plt.savefig('../../Pictures/Testdata/Returns_Testdata.png')
+    plt.savefig(FIGURE_DIR / 'returns.png')
 
     # plot features
     fig, axes = plt.subplots(4, 1, figsize=(9, 12))
@@ -356,5 +363,5 @@ def plotter(df=None):
     sns.lineplot(ax=axes[1], data=df['RV'], legend='auto', label='Realized variation')
     sns.lineplot(ax=axes[2], data=df['Diff'], legend='auto', label='Difference')
     sns.lineplot(ax=axes[3], data=df['SJ'], legend='auto', label='Signed jumps')
-    plt.savefig('../../Pictures/Testdata/Features_Testdata.png')
+    plt.savefig(FIGURE_DIR / 'features.png')
     plt.show()
